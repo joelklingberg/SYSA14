@@ -71,4 +71,61 @@ public class UserDAO {
 		}
 		return bean;
 	}
+	
+	public static void register(UserBean bean) {
+		//preparing some objects for connection
+		Statement stmt = null;
+		String username = bean.getUsername();
+		String password = bean.getPassword();
+		String firstName = bean.getFirstName();
+		String lastName = bean.getLastName();
+		
+		String insertQuery = "INSERT INTO users (username, password, firstName, lastName) VALUES ('" + username + "', '" + password
+				+ "', '" + firstName + "', '" + lastName + "')";
+		
+		System.out.println("Your user name is " + username);
+		System.out.println("Your password is " + password);
+		System.out.println("Your firstname is " + firstName);
+		System.out.println("Your lastname is " + lastName);
+		System.out.println("Query: " + insertQuery);
+		
+		try {
+			//connect to DB
+			currentCon = ConnectionManager.getConnection();
+			stmt = currentCon.createStatement();
+			rs = stmt.executeQuery(insertQuery);
+
+		} catch (Exception ex) {
+			System.out.println("Registering user failed: An Exception has occurred! " + ex);
+		} finally {
+			// Exception handling
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (Exception e) {
+					
+				}
+				rs = null;
+			}
+			
+			if (stmt != null) {
+				try {
+					stmt.close(); 
+				} catch (Exception e) {
+				
+				}
+			stmt = null; 
+			}
+			
+			if (currentCon != null) {
+				try {
+					currentCon.close();
+				} catch (Exception e) {
+					
+				}
+				currentCon = null;
+			}
+		}
+		//return bean;
+	}
 }
