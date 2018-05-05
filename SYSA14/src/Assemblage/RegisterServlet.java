@@ -28,8 +28,7 @@ public class RegisterServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		//response.getWriter().append("Served at: ").append(request.getContextPath());
+		String message = "";
 		try {
 			UserBean user = new UserBean();
 			user.setUserName(request.getParameter("username"));
@@ -37,21 +36,15 @@ public class RegisterServlet extends HttpServlet {
 			user.setFirstName(request.getParameter("firstname"));
 			user.setLastName(request.getParameter("lastname"));
 			
-			UserDAO.register(user);
-			user = UserDAO.login(user);
-			
-			if (user.isValid()) {
-				// Respond with logged in page
-				HttpSession session = request.getSession(true);
-				session.setAttribute("currentSessionUser", user);
-				response.sendRedirect("loggedInPage.jsp"); //logged-in page
-			} else {
-				// Respond with invalid login page
-				response.sendRedirect("invalidLogin.jsp");
-			}
+			message = UserDAO.register(user);
+
 		} catch (Error e){
 			System.out.println(e.getStackTrace());
 		}
+		
+		//Response message
+		request.setAttribute("message", message);
+		request.getRequestDispatcher("/register.jsp").forward(request, response);
 	}
 
 	/**

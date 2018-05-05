@@ -72,7 +72,7 @@ public class UserDAO {
 		return bean;
 	}
 	
-	public static void register(UserBean bean) {
+	public static String register(UserBean bean) {
 		//preparing some objects for connection
 		Statement stmt = null;
 		String username = bean.getUsername();
@@ -89,14 +89,27 @@ public class UserDAO {
 		System.out.println("Your lastname is " + lastName);
 		System.out.println("Query: " + insertQuery);
 		
+		String message = "";
 		try {
 			//connect to DB
 			currentCon = ConnectionManager.getConnection();
 			stmt = currentCon.createStatement();
-			rs = stmt.executeQuery(insertQuery);
+			stmt.executeQuery(insertQuery);
+			message = "Successfully registered user.";
 
-		} catch (Exception ex) {
-			System.out.println("Registering user failed: An Exception has occurred! " + ex);
+		} catch (SQLException ex) {
+			System.out.println("Errorcode " + ex.getErrorCode() + ": Registering user failed: An Exception has occurred! " + ex);
+			int errorcode = ex.getErrorCode();
+			
+			switch(errorcode){
+				case 2601: message = "User with that username already exists. Please pick another username.";
+				break;
+				case 2627: message = "User with that username already exists. Please pick another username.";
+				break;
+				default: message = "Error registering user";
+				break;
+			}
+			
 		} finally {
 			// Exception handling
 			if (rs != null) {
@@ -126,6 +139,6 @@ public class UserDAO {
 				currentCon = null;
 			}
 		}
-		//return bean;
+		return message;
 	}
 }

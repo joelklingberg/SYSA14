@@ -15,6 +15,7 @@
 		Re-type Password:<input type="password" name="passwordRetyped"/><br/><br/>
 		
 		<input type="submit" value="register"/>
+		<p>Message: ${message}</p>
 	</form> 
 </body>
 </html>

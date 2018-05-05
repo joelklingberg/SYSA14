@@ -28,7 +28,7 @@ public class LoginServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		//response.getWriter().append("Served at: ").append(request.getContextPath());
+		String message = "";
 		try {
 			UserBean user = new UserBean();
 			user.setUserName(request.getParameter("username"));
@@ -41,11 +41,16 @@ public class LoginServlet extends HttpServlet {
 				response.sendRedirect("loggedInPage.jsp"); //logged-in page
 			} else {
 				// Respond with invalid login page
-				response.sendRedirect("invalidLogin.jsp");
+				//response.sendRedirect("invalidLogin.jsp");
+				message = "Incorrect username or password";
 			}
 		} catch (Error e){
 			System.out.println(e.getStackTrace());
 		}
+		
+		//Response message
+				request.setAttribute("message", message);
+				request.getRequestDispatcher("/login.jsp").forward(request, response);
 	}
 
 	/**
