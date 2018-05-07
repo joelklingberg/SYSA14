@@ -94,7 +94,7 @@ public class UserDAO {
 			//connect to DB
 			currentCon = ConnectionManager.getConnection();
 			stmt = currentCon.createStatement();
-			stmt.executeQuery(insertQuery);
+			stmt.execute(insertQuery);
 			message = "Successfully registered user.";
 
 		} catch (SQLException ex) {
@@ -140,5 +140,74 @@ public class UserDAO {
 			}
 		}
 		return message;
+	}
+	
+	public static UserBean findByUsername(String username) {
+		//preparing some objects for connection
+		Statement stmt = null;
+		UserBean user = new UserBean();
+		
+		String findQuery = "SELECT * FROM users WHERE username = '" + username + "';";
+		
+		System.out.println("Find by username query: " + findQuery);
+
+		try {
+			//connect to DB
+			currentCon = ConnectionManager.getConnection();
+			stmt = currentCon.createStatement();
+			ResultSet rs = stmt.executeQuery(findQuery);
+			
+			while(rs.next()){
+				user.setFirstName(rs.getString("firstName"));
+				user.setLastName(rs.getString("lastName"));
+				user.setPassword(rs.getString("password"));
+				user.setUserName(rs.getString("username"));
+			}
+
+		} catch (SQLException ex) {
+			System.out.println("Errorcode " + ex.getErrorCode() + ": Find user by username failed: An Exception has occurred! " + ex);
+			int errorcode = ex.getErrorCode();
+			
+			/*
+			switch(errorcode){
+				case 2601: message = "User with that username already exists. Please pick another username.";
+				break;
+				case 2627: message = "User with that username already exists. Please pick another username.";
+				break;
+				default: message = "Error registering user";
+				break;
+			}
+			*/
+			
+		} finally {
+			// Exception handling
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (Exception e) {
+					
+				}
+				rs = null;
+			}
+			
+			if (stmt != null) {
+				try {
+					stmt.close(); 
+				} catch (Exception e) {
+				
+				}
+			stmt = null; 
+			}
+			
+			if (currentCon != null) {
+				try {
+					currentCon.close();
+				} catch (Exception e) {
+					
+				}
+				currentCon = null;
+			}
+		}
+		return user;
 	}
 }

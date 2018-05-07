@@ -1,6 +1,7 @@
 package Assemblage;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,14 +13,14 @@ import javax.servlet.http.HttpSession;
 /**
  * Servlet implementation class RegisterServlet
  */
-@WebServlet("/RegisterServlet")
-public class RegisterServlet extends HttpServlet {
+@WebServlet("/RegisterCarServlet")
+public class RegisterCarServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
 	/**
      * @see HttpServlet#HttpServlet()
      */
-    public RegisterServlet() {
+    public RegisterCarServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -28,36 +29,36 @@ public class RegisterServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-		/*
-		String action = request.getParameter("action");
-
-		if (action.equals("student")){ 
-		    // to do rest of code..
-		}
-
-		else if (action.equals("teacher")){ 
-		    // to do rest of code..
-		}
-		*/
-		
 		String message = "";
 		try {
-			UserBean user = new UserBean();
-			user.setUserName(request.getParameter("username"));
-			user.setPassword(request.getParameter("password"));
-			user.setFirstName(request.getParameter("firstname"));
-			user.setLastName(request.getParameter("lastname"));
+			UserBean owner = (UserBean) request.getSession().getAttribute("currentSessionUser");
+			CarBean car = new CarBean();
+			String brand = request.getParameter("brand");
+			int price = Integer.parseInt(request.getParameter("price"));
+			boolean forSale = false;
+			String year = request.getParameter("year");
 			
-			message = UserDAO.register(user);
-
+			// Check so the user is logged in before proceeding:
+			if(owner != null){
+				// Logged in.
+				car.setOwner(owner);
+				car.setBrand(brand);
+				car.setPrice(price);
+				car.setForSale(forSale);
+				car.setYear(year);
+				
+				message = CarDAO.register(car);
+			} else {
+				// Not logged in.
+				message = "Not logged in.";
+			}
 		} catch (Error e){
 			System.out.println(e.getStackTrace());
 		}
 		
 		//Response message
 		request.setAttribute("message", message);
-		request.getRequestDispatcher("/register.jsp").forward(request, response);
+		request.getRequestDispatcher("/registerCar.jsp").forward(request, response);
 	}
 
 	/**
