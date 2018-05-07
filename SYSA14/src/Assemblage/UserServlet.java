@@ -118,6 +118,8 @@ public class UserServlet extends HttpServlet {
 			} else {
 				// Could not find user profile
 				System.out.println("Could not find user profile for username: " + username);
+				// 404 page.
+				response.sendRedirect("404.jsp");
 			}
 		} catch (Error e){
 			System.out.println("Error in UserServlet showProfile action: " + e.getStackTrace());

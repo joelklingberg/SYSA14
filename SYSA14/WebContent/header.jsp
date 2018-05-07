@@ -45,6 +45,7 @@
 				        </a>
 				        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
 				          <a class="dropdown-item" href="users?action=showProfile&username=<%= currentUser.getUsername() %>">View profile</a>
+				          <a class="dropdown-item" href="registerCar.jsp">Register car</a>
 				          <div class="dropdown-divider"></div>
 				          <a class="dropdown-item" href="users?action=logoutUser">Logout</a>
 				        </div>

@@ -17,14 +17,11 @@ public class CarDAO {
 		String brand = bean.getBrand();
 		String year = bean.getYear();
 		int price = bean.getPrice();
+		String description = bean.getDescription();
 		
-		String insertQuery = "INSERT INTO cars (owner, brand, year, price, sold) VALUES ('" + owner + "', '" + brand
-				+ "', '" + year + "', '" + price + "', 0" + ")";
+		String insertQuery = "INSERT INTO cars (owner, brand, year, price, forsale, description) VALUES ('" + owner + "', '" + brand
+				+ "', '" + year + "', '" + price + "', 0" + ", '" + description + "')";
 		
-		System.out.println("Registered car for " + owner);
-		System.out.println("Registered car brand: " + brand);
-		System.out.println("Registered car year: " + year);
-		System.out.println("Registered car price: " + price);
 		System.out.println("Query: " + insertQuery);
 		
 		String message = "";
@@ -106,6 +103,7 @@ public class CarDAO {
 				int price = rs.getInt("price");
 				String year = rs.getString("year");
 				boolean forSale = rs.getBoolean("forsale");
+				String description = rs.getString("description");
 				
 				car.setId(id);
 				car.setOwner(owner);
@@ -113,6 +111,7 @@ public class CarDAO {
 				car.setPrice(price);
 				car.setYear(year);
 				car.setForSale(forSale);
+				car.setDescription(description);
 				
 				cars.add(car);
 			}
@@ -186,6 +185,7 @@ public class CarDAO {
 						int price = rs.getInt("price");
 						String year = rs.getString("year");
 						boolean forSale = rs.getBoolean("forsale");
+						String description = rs.getString("description");
 						
 						car.setOwner(owner);
 						car.setBrand(brand);
@@ -193,6 +193,7 @@ public class CarDAO {
 						car.setYear(year);
 						car.setForSale(forSale);
 						car.setId(carId);
+						car.setDescription(description);
 					}
 
 				} catch (SQLException ex) {
@@ -266,6 +267,7 @@ public class CarDAO {
 						int price = rs.getInt("price");
 						String year = rs.getString("year");
 						boolean forSale = rs.getBoolean("forSale");
+						String description = rs.getString("description");
 						
 						car.setOwner(owner);
 						car.setBrand(brand);
@@ -273,6 +275,7 @@ public class CarDAO {
 						car.setYear(year);
 						car.setForSale(forSale);
 						car.setId(carId);
+						car.setDescription(description);
 						
 						cars.add(car);
 					}
@@ -495,6 +498,137 @@ public class CarDAO {
 						currentCon = null;
 					}
 				}
+	}
+	
+	public static void deleteCar(int id) {
+		// Preparing some objects for connection.
+				Statement stmt = null;
+			
+				String query = "DELETE FROM cars WHERE id = " + id + ";";
+				try {
+					//connect to DB
+					currentCon = ConnectionManager.getConnection();
+					stmt = currentCon.createStatement();
+					stmt.execute(query);
+
+				} catch (SQLException ex) {
+					System.out.println("Errorcode " + ex.getErrorCode() + ": Deleting car failed: An Exception has occurred! " + ex);
+					int errorcode = ex.getErrorCode();
+					
+					/*
+					switch(errorcode){
+						case 2601: message = "User with that username already exists. Please pick another username.";
+						break;
+						case 2627: message = "User with that username already exists. Please pick another username.";
+						break;
+						default: message = "Error registering user";
+						break;
+					}
+					*/
+					
+				} finally {
+					// Exception handling
+					if (rs != null) {
+						try {
+							rs.close();
+						} catch (Exception e) {
+							
+						}
+						rs = null;
+					}
+					
+					if (stmt != null) {
+						try {
+							stmt.close(); 
+						} catch (Exception e) {
+						
+						}
+					stmt = null; 
+					}
+					
+					if (currentCon != null) {
+						try {
+							currentCon.close();
+						} catch (Exception e) {
+							
+						}
+						currentCon = null;
+					}
+				}
+	}
+	
+	public static String editCar(int id, CarBean newCar) {
+		//preparing some objects for connection
+		Statement stmt = null;
+		
+		CarBean car = CarDAO.findCarById(id);
+		String message = "";
+		if(car != null){
+			// Found car.
+			String editQuery = "UPDATE cars SET brand = '" + newCar.getBrand() + "', year = '" + newCar.getYear() 
+					+ "', price = '" + newCar.getPrice() + "', description = '" + newCar.getDescription() + "' WHERE id = " + id + ";";
+			System.out.println("Query: " + editQuery);
+			
+			
+			
+			try {
+				//connect to DB
+				currentCon = ConnectionManager.getConnection();
+				stmt = currentCon.createStatement();
+				stmt.execute(editQuery);
+				message = "Successfully updated car details.";
+
+			} catch (SQLException ex) {
+				System.out.println("Errorcode " + ex.getErrorCode() + ": Updating car failed: An Exception has occurred! " + ex);
+				int errorcode = ex.getErrorCode();
+				
+				/*
+				switch(errorcode){
+					case 2601: message = "User with that username already exists. Please pick another username.";
+					break;
+					case 2627: message = "User with that username already exists. Please pick another username.";
+					break;
+					default: message = "Error registering user";
+					break;
+				}
+				*/
+				
+			} finally {
+				// Exception handling
+				if (rs != null) {
+					try {
+						rs.close();
+					} catch (Exception e) {
+						
+					}
+					rs = null;
+				}
+				
+				if (stmt != null) {
+					try {
+						stmt.close(); 
+					} catch (Exception e) {
+					
+					}
+				stmt = null; 
+				}
+				
+				if (currentCon != null) {
+					try {
+						currentCon.close();
+					} catch (Exception e) {
+						
+					}
+					currentCon = null;
+				}
+			}
+			return message;
+			
+		} else {
+			// Could not find car.
+			message = "Could not find car.";
+			return message;
+		}
 	}
 	
 }

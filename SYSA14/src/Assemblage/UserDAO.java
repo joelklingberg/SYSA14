@@ -208,6 +208,11 @@ public class UserDAO {
 				currentCon = null;
 			}
 		}
-		return user;
+		if (user.getUsername() == null){
+			// Could not find the user you were looking for.
+			return null;
+		} else {
+			return user;
+		}
 	}
 }

@@ -35,7 +35,10 @@ public class CarServlet extends HttpServlet {
 		
 		if (action.equals("showCars")) {
 			showCars(request, response);
-		} 
+		}
+		else if (action.equals("showEditCar")) {
+			showEditCar(request, response);
+		}
 		else if (action.equals("registerCar")) {
 			registerCar(request, response);
 		}
@@ -47,6 +50,12 @@ public class CarServlet extends HttpServlet {
 		}
 		else if (action.equals("stopSelling")) {
 			stopSelling(request, response);
+		}
+		else if (action.equals("editCar")) {
+			editCar(request, response);
+		}
+		else if (action.equals("deleteCar")) {
+			deleteCar(request, response);
 		}
 		else {
 			System.out.println("No action found for action: " + action);
@@ -71,6 +80,14 @@ public class CarServlet extends HttpServlet {
 	    request.getRequestDispatcher("/showCars.jsp").forward(request, response);
 	}
 	
+	private void showEditCar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		int id = Integer.parseInt(request.getParameter("carId"));
+		CarBean editingCar = CarDAO.findCarById(id);
+		HttpSession session = request.getSession(true);
+		session.setAttribute("editingCar", editingCar);
+	    request.getRequestDispatcher("/editCar.jsp").forward(request, response);
+	}
+	
 	private void registerCar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String message = "";
 		try {
@@ -80,6 +97,7 @@ public class CarServlet extends HttpServlet {
 			int price = Integer.parseInt(request.getParameter("price"));
 			boolean forSale = false;
 			String year = request.getParameter("year");
+			String description = request.getParameter("description");
 			
 			// Check so the user is logged in before proceeding:
 			if(owner != null){
@@ -89,6 +107,7 @@ public class CarServlet extends HttpServlet {
 				car.setPrice(price);
 				car.setForSale(forSale);
 				car.setYear(year);
+				car.setDescription(description);
 				
 				message = CarDAO.register(car);
 			} else {
@@ -114,15 +133,20 @@ public class CarServlet extends HttpServlet {
 			if(newOwner != null){
 				// Logged in.
 				CarDAO.changeOwner(id, newOwner);
-
+				
+				String referer = request.getHeader("Referer");
+			    response.sendRedirect(referer);
 			} else {
 				// Not logged in.
+				System.out.println("User not logged in, can not buy car.");
+				String message = "Please login before buying cars";
+				request.setAttribute("message", message);
+				request.getRequestDispatcher("/login.jsp").forward(request, response);
 			}
 		} catch (Error e){
 			System.out.println(e.getStackTrace());
 		}
-		String referer = request.getHeader("Referer");
-	    response.sendRedirect(referer);
+		
 	}
 	
 	private void sellCar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -175,5 +199,88 @@ public class CarServlet extends HttpServlet {
 		}
 		String referer = request.getHeader("Referer");
 	    response.sendRedirect(referer);
+	}
+	
+	private void deleteCar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		int id = Integer.parseInt(request.getParameter("carId"));
+		
+		try {
+			UserBean currentUser = (UserBean) request.getSession().getAttribute("currentSessionUser");
+			
+			// Check so the user is logged in before proceeding:
+			if(currentUser != null){
+				// Logged in.
+				
+				CarBean car = CarDAO.findCarById(id);
+				
+				// Check so the user owns the car:
+				if(car.getOwnerUsername().equals(currentUser.getUsername())){
+					// Current user owns the car, therefor it is deleted.
+					CarDAO.deleteCar(id);
+				} else {
+					// Current user does not own the car.
+					System.out.println("Can not delete car not owned by current user.");
+				}
+			} else {
+				// Not logged in.
+				System.out.println("Can not delete car without being logged in.");
+			}
+		} catch (Error e){
+			System.out.println(e.getStackTrace());
+		}
+		String referer = request.getHeader("Referer");
+	    response.sendRedirect(referer);
+	}
+	
+	private void editCar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		int id = Integer.parseInt(request.getParameter("carId"));
+		
+		try {
+			UserBean currentUser = (UserBean) request.getSession().getAttribute("currentSessionUser");
+			
+			// Check so the user is logged in before proceeding:
+			if(currentUser != null){
+				// Logged in.
+				
+				CarBean car = CarDAO.findCarById(id);
+				
+				// Check so the user owns the car:
+				if(car.getOwnerUsername().equals(currentUser.getUsername())){
+					// Current user owns the car, therefor it is edited.
+					
+					CarBean newCar = new CarBean();
+					String brand = request.getParameter("brand");
+					int price = Integer.parseInt(request.getParameter("price"));
+					String year = request.getParameter("year");
+					String description = request.getParameter("description");
+					
+					newCar.setBrand(brand);
+					newCar.setPrice(price);
+					newCar.setYear(year);
+					newCar.setDescription(description);
+					
+					String message = CarDAO.editCar(id, newCar);
+					
+					request.setAttribute("message", message);
+					String url = "cars?action=showEditCar&carId=" + id;
+					request.getRequestDispatcher(url).forward(request, response);
+				} else {
+					// Current user does not own the car.
+					System.out.println("Can not edit car not owned by current user.");
+					String referer = request.getHeader("Referer");
+				    response.sendRedirect(referer);
+				}
+			} else {
+				// Not logged in.
+				String message = "Please login before editing car.";
+				System.out.println("Can not edit car without being logged in.");
+				request.setAttribute("message", message);
+				String url = "cars?action=showEditCar&carId=" + id;
+				request.getRequestDispatcher(url).forward(request, response);
+			}
+		} catch (Error e){
+			System.out.println(e.getStackTrace());
+		}
+		
 	}
 }

@@ -9,6 +9,7 @@ public class CarBean implements java.io.Serializable {
 	private int price;
 	private boolean forSale;
 	private int id;
+	private String description;
 	
 	public String getOwnerUsername() {
 		if(owner != null){
@@ -68,5 +69,13 @@ public class CarBean implements java.io.Serializable {
 	}
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }
